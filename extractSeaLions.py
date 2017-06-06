@@ -8,10 +8,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 import sealion
 
-# import keras
-# from keras.models import Sequential, load_model
-# from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D, Lambda, Cropping2D
-# from keras.utils import np_utils
+import keras
+from keras.models import Sequential, load_model
+from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D, Lambda, Cropping2D
+from keras.utils import np_utils
 # matplotlib inline
 
 '''
@@ -27,7 +27,7 @@ file_names = os.listdir(sealion.DOTTED)
 file_names = sorted(file_names, key=lambda
     item: (int(item.partition('.')[0]) if item[0].isdigit() else float('inf'), item))
 # select a subset of files to run on
-file_names = file_names[0:5]
+# file_names = file_names[0:5]
 
 # dataframe to store results in
 coordinates_df = pd.DataFrame(index=file_names, columns=classes);
@@ -147,3 +147,50 @@ encoder = LabelBinarizer()
 encoder.fit(y)
 y = encoder.transform(y).astype(float)
 print y
+
+'''
+-----------------------------------------------------
+            Build Keras model                       |
+-----------------------------------------------------
+'''
+model = Sequential()
+
+model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(32,32,3)))
+
+
+model.add(Conv2D(32, (5, 5), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Conv2D(64, (5, 5), activation='relu', padding='same'))
+
+model.add(Flatten())
+
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(5, activation='softmax'))
+
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+history = model.fit(x, y, epochs=20, validation_split=0.2, verbose=0)
+
+
+'''
+-----------------------------------------------------
+                      Plot results                   |
+-----------------------------------------------------
+'''
+# http://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
+# summarize history for accuracy
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
