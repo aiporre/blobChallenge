@@ -17,7 +17,7 @@ from keras.utils import np_utils
 # matplotlib inline
 
 
-class SeelionImageReader(object):
+class SeelionImageReader:
     '''
     ---------------------------
           Initialization      |
